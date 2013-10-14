@@ -10,19 +10,13 @@ IServiceBusQueueDetail connection = new ServiceBusQueueConnection("Endpoint=sb:/
 
 TopologyBuilder builder = new TopologyBuilder();
 
-builder.setSpout("word-reader",new ServiceBusQueueSpout(connection));
-
+builder.setSpout("sb-queue-reader",new ServiceBusQueueSpout(connection));
 builder.setBolt("bolt-reader", new AnyBolt())
     .shuffleGrouping("any-bolt");
 
-
 Configuration configuration = new Configuration();
-
 LocalCluster cluster = new LocalCluster();
-
 cluster.submitTopology("toplogy", conf, builder.createTopology());
-
 Thread.sleep(1000);
-
 cluster.shutdown();
 ```
