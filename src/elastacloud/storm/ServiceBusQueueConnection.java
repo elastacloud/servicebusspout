@@ -25,22 +25,29 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
     private Integer messageCount;
     private List<String> messages;
     private ServiceBusContract serviceBusContract = null;
+    private Boolean isConnected = false;
 
     public ServiceBusQueueConnection(String connectionString, String queueName) throws ServiceBusSpoutException {
         this.connectionString = connectionString;
         this.queueName = queueName;
         messages = new ArrayList<String>();
-        Connect();
     }
 
     @Override
-    public String getConnectionString()   {
+    public String getConnectionString() throws ServiceBusSpoutException {
+        if(this.connectionString.split(";").length != 3)    {
+            throw new ServiceBusSpoutException("incorrectly formatted connection string");
+        }
+
         return this.connectionString;
     }
 
     @Override
-    public String getQueueName() {
-        return this.queueName;
+    public String getQueueName() throws ServiceBusSpoutException {
+        if(this.queueName.length() > 11 || this.queueName.length() < 3) {
+            throw new ServiceBusSpoutException("incorrect length of queue name must be > 3 and < 11");
+        }
+        return this.queueName.toLowerCase();
     }
 
     @Override
@@ -48,16 +55,18 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
         return messageCount;
     }
 
-    private void Connect() throws ServiceBusSpoutException {
+    @Override
+    public void connect() throws ServiceBusSpoutException {
         Configuration configuration = new Configuration();
-        configuration = ServiceBusConfiguration.configureWithConnectionString(null, configuration, this.connectionString);
+        configuration = ServiceBusConfiguration.configureWithConnectionString(null, configuration, getConnectionString());
 
         ServiceBusContract service = ServiceBusService.create(configuration);
         QueueInfo queueInfo = new QueueInfo(this.queueName);
         try
         {
             CreateQueueResult result = service.createQueue(queueInfo);
-
+            // chances are if this fails we'll be looking at the queue already existing
+            isConnected = true;
         }
         catch (ServiceException e)
         {
@@ -67,6 +76,10 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
 
     @Override
     public String getNextMessageForSpout() throws ServiceBusSpoutException {
+
+        if(!isConnected())  {
+            throw new ServiceBusSpoutException("call connect() before trying to receive messages");
+        }
         ReceiveMessageOptions receiveOptions = ReceiveMessageOptions.DEFAULT;
         receiveOptions.setReceiveMode(ReceiveMode.PEEK_LOCK);
 
@@ -92,5 +105,10 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
             }
         }
         return null;
+    }
+
+    @Override
+    public Boolean isConnected() {
+        return this.isConnected;
     }
 }
