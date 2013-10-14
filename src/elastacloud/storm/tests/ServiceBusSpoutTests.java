@@ -68,6 +68,7 @@ public class ServiceBusSpoutTests {
         verify(serviceBusQueueMock, times(1)).connect();
         verify(serviceBusQueueMock, times(1)).isConnected();
         assertTrue(serviceBusSpout.isConnected());
+        assertEquals(1, serviceBusSpout.getProcessedMessageCount());
     }
 
     @Test
@@ -81,6 +82,7 @@ public class ServiceBusSpoutTests {
         verify(serviceBusQueueMock, times(1)).connect();
         verify(serviceBusQueueMock, times(1)).isConnected();
         assertFalse(serviceBusSpout.isConnected());
+        assertEquals(0, serviceBusSpout.getProcessedMessageCount());
     }
 }
 

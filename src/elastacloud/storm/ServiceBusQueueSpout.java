@@ -13,6 +13,7 @@ import java.util.Map;
 public class ServiceBusQueueSpout extends BaseRichSpout {
     private IServiceBusQueueDetail detail;
     private SpoutOutputCollector collector;
+    private long processedMessages = 0L;
 
     public ServiceBusQueueSpout(IServiceBusQueueDetail detail)  {
          this.detail = detail;
@@ -45,6 +46,7 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
             collector.emit(new Values(message));
+            processedMessages++;
         }
         catch(ServiceBusSpoutException sbse)    {
             // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
@@ -60,5 +62,9 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
 
     public Boolean isConnected()    {
         return this.detail.isConnected();
+    }
+
+    public long getProcessedMessageCount()  {
+        return this.processedMessages;
     }
 }
