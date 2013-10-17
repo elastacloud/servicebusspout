@@ -9,9 +9,10 @@ import backtype.storm.tuple.Values;
 import elastacloud.storm.interfaces.IServiceBusQueueDetail;
 import elastacloud.storm.interfaces.IServiceBusTopicDetail;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout {
+public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements Serializable {
 
     private IServiceBusTopicDetail detail;
     private SpoutOutputCollector collector;
@@ -19,6 +20,10 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout {
 
     public ServiceBusTopicSubscriptionSpout(IServiceBusTopicDetail detail)  {
         this.detail = detail;
+    }
+
+    public ServiceBusTopicSubscriptionSpout(String connectionString, String topicName) throws ServiceBusSpoutException  {
+        this.detail = new ServiceBusTopicConnection(connectionString, topicName, null);
     }
 
     @Override
@@ -50,8 +55,7 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout {
             collector.emit(new Values(message));
             processedMessages++;
         }
-        catch(ServiceBusSpoutException sbse)    {
-            // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
+        catch(ServiceBusSpoutException sbse)    {                  // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
             // TODO: look at adding a retry-fail strategy if this continually dies then it maybe that we're connected but something
             // has happened to the SB namespace
             try{Thread.sleep(500);} catch(InterruptedException ie) {};

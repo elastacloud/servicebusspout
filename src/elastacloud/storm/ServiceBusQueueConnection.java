@@ -7,7 +7,11 @@ import elastacloud.storm.interfaces.IServiceBusQueueDetail;
 import com.microsoft.windowsazure.services.serviceBus.*;
 import com.microsoft.windowsazure.services.serviceBus.models.*;
 import com.microsoft.windowsazure.services.core.*;
+import org.apache.commons.io.IOUtils;
+
 import javax.xml.datatype.*;
+import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +22,7 @@ import java.util.List;
  * Time: 09:38
  * To change this template use File | Settings | File Templates.
  */
-public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
+public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serializable {
 
     private String connectionString;
     private String queueName;
@@ -60,17 +64,22 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
         Configuration configuration = new Configuration();
         configuration = ServiceBusConfiguration.configureWithConnectionString(null, configuration, getConnectionString());
 
-        ServiceBusContract service = ServiceBusService.create(configuration);
+        serviceBusContract = ServiceBusService.create(configuration);
         QueueInfo queueInfo = new QueueInfo(this.queueName);
         try
         {
-            CreateQueueResult result = service.createQueue(queueInfo);
+            CreateQueueResult result = serviceBusContract.createQueue(queueInfo);
             // chances are if this fails we'll be looking at the queue already existing
             isConnected = true;
         }
         catch (ServiceException e)
         {
-            throw new ServiceBusSpoutException(e.getMessage());
+            if(e.getHttpStatusCode() == 409)    {
+                isConnected = true;
+            }
+            else    {
+                throw new ServiceBusSpoutException(e.getMessage());
+            }
         }
     }
 
@@ -86,13 +95,20 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail {
         BrokeredMessage message = null;
         try {
 
+            System.out.println("waiting on queue for messages ... ");
             ReceiveQueueMessageResult receive = serviceBusContract.receiveQueueMessage(this.queueName, receiveOptions);
-            message = receive.getValue();
 
             if (message != null && message.getMessageId() != null)
             {
+                message = receive.getValue();
+                // get the string value from the body
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(message.getBody(), writer);
+                String messageBody = writer.toString();
+                // spit this out ...
+                System.out.println("message arrived with value " + messageBody);
                 serviceBusContract.deleteMessage(message);
-                return message.toString();
+                return messageBody;
             }
         }
         catch(Exception se)  {

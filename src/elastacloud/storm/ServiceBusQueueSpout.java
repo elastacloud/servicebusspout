@@ -19,10 +19,16 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
          this.detail = detail;
     }
 
+    public ServiceBusQueueSpout(String connectionString, String queueName) throws ServiceBusSpoutException  {
+        this.detail = new ServiceBusQueueConnection(connectionString, queueName);
+    }
+
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
         this.collector = spoutOutputCollector;
+
         try {
+            System.out.println("connecting to service bus queue " + this.detail.getQueueName());
             this.detail.connect();
             this.collector = spoutOutputCollector;
         }
@@ -32,7 +38,7 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
 
     @Override
     public void close() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        System.out.println("closing service bus contract ");
     }
 
     @Override
@@ -40,11 +46,13 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
         // we'll try this on the main thread - if there is a problem then we'll implement runnable
         // check performance against this approach but we can let the spout scale rather than scale ourselves
         try{
+            System.out.println("attempting to get next message from queue " + this.detail.getQueueName());
             if(!this.detail.isConnected())
                 return;
 
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
+            System.out.println("Received message is null: " + (message == null));
             collector.emit(new Values(message));
             processedMessages++;
         }

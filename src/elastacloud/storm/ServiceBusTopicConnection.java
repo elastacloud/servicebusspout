@@ -8,8 +8,11 @@ import com.microsoft.windowsazure.services.serviceBus.*;
 import com.microsoft.windowsazure.services.serviceBus.models.*;
 import com.microsoft.windowsazure.services.core.*;
 import elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import org.apache.commons.io.IOUtils;
 
 import javax.xml.datatype.*;
+import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +23,7 @@ import java.util.List;
  * Time: 09:38
  * To change this template use File | Settings | File Templates.
  */
-public class ServiceBusTopicConnection implements IServiceBusTopicDetail {
+public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serializable {
 
     private String connectionString;
     private String topicName;
@@ -46,7 +49,7 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail {
 
     @Override
     public String getTopicName() throws ServiceBusSpoutException  {
-        if(this.topicName.length() > 11 || this.topicName.length() < 3) {
+        if(this.topicName.length() > 18 || this.topicName.length() < 3) {
             throw new ServiceBusSpoutException("incorrect length of topic name must be > 3 and < 11");
         }
         return this.topicName.toLowerCase();
@@ -77,7 +80,14 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail {
         try
         {
             // create the new topic
-            CreateTopicResult ctResult = serviceBusContract.createTopic(topicInfo);
+            try {
+                CreateTopicResult ctResult = serviceBusContract.createTopic(topicInfo);
+            }
+            catch(ServiceException se)  {
+                if(se.getHttpStatusCode() != 409)
+                    throw se;
+            }
+
             String subscriptionName = getTopicName() + "sub";
             // create a subscription for the topic
             SubscriptionInfo subInfo = new SubscriptionInfo(subscriptionName);
@@ -92,7 +102,12 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail {
         }
         catch (ServiceException e)
         {
-            throw new ServiceBusSpoutException(e.getMessage());
+            if(e.getHttpStatusCode() == 409)    {
+                isConnected = true;
+            }
+            else    {
+                throw new ServiceBusSpoutException(e.getMessage());
+            }
         }
     }
 
@@ -108,13 +123,19 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail {
         BrokeredMessage message = null;
         try {
 
-            ReceiveSubscriptionMessageResult  result = serviceBusContract.receiveSubscriptionMessage(getTopicName(), getTopicName() + "sub", receiveOptions);
-            message = result.getValue();
+            ReceiveSubscriptionMessageResult receive = serviceBusContract.receiveSubscriptionMessage(getTopicName(), getTopicName() + "sub", receiveOptions);
+            message = receive.getValue();
 
             if (message != null && message.getMessageId() != null)
             {
+                // get the string value from the body
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(message.getBody(), writer);
+                String messageBody = writer.toString();
+                // spit this out ...
+                System.out.println("message arrived with value " + messageBody);
                 serviceBusContract.deleteMessage(message);
-                return message.toString();
+                return messageBody;
             }
         }
         catch(Exception se)  {
