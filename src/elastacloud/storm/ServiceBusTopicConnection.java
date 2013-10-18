@@ -9,6 +9,7 @@ import com.microsoft.windowsazure.services.serviceBus.models.*;
 import com.microsoft.windowsazure.services.core.*;
 import elastacloud.storm.interfaces.IServiceBusTopicDetail;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import javax.xml.datatype.*;
 import java.io.Serializable;
@@ -31,6 +32,8 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
     private ServiceBusContract serviceBusContract = null;
     private Boolean isConnected = false;
     private String filter;
+
+    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusTopicConnection");
 
     public ServiceBusTopicConnection(String connectionString, String topicName, String filter) throws ServiceBusSpoutException {
         this.connectionString = connectionString;

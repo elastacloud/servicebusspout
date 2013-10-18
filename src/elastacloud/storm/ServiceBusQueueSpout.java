@@ -7,6 +7,7 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import elastacloud.storm.interfaces.IServiceBusQueueDetail;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 
@@ -14,6 +15,8 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
     private IServiceBusQueueDetail detail;
     private SpoutOutputCollector collector;
     private long processedMessages = 0L;
+
+    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusQueueSpout");
 
     public ServiceBusQueueSpout(IServiceBusQueueDetail detail)  {
          this.detail = detail;
@@ -28,7 +31,7 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
         this.collector = spoutOutputCollector;
 
         try {
-            System.out.println("connecting to service bus queue " + this.detail.getQueueName());
+            logger.info("connecting to service bus queue " + this.detail.getQueueName());
             this.detail.connect();
             this.collector = spoutOutputCollector;
         }
@@ -38,7 +41,7 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
 
     @Override
     public void close() {
-        System.out.println("closing service bus contract ");
+        logger.info("closing service bus contract ");
     }
 
     @Override
@@ -46,19 +49,20 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
         // we'll try this on the main thread - if there is a problem then we'll implement runnable
         // check performance against this approach but we can let the spout scale rather than scale ourselves
         try{
-            System.out.println("attempting to get next message from queue " + this.detail.getQueueName());
+            logger.info("attempting to get next message from queue " + this.detail.getQueueName());
             if(!this.detail.isConnected())
                 return;
 
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
-            System.out.println("Received message is null: " + (message == null));
+            logger.info("Received message is null: " + (message == null));
             collector.emit(new Values(message));
             processedMessages++;
         }
         catch(ServiceBusSpoutException sbse)    {
             // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
             // TODO: look at adding a retry-fail strategy if this continually dies then it maybe that we're connected but something
+            logger.error(sbse.getMessage());
             // has happened to the SB namespace
             try{Thread.sleep(500);} catch(InterruptedException ie) {};
         }

@@ -8,6 +8,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import elastacloud.storm.interfaces.IServiceBusQueueDetail;
 import elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements S
     private IServiceBusTopicDetail detail;
     private SpoutOutputCollector collector;
     private long processedMessages = 0L;
+
+    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusTopicConnection");
 
     public ServiceBusTopicSubscriptionSpout(IServiceBusTopicDetail detail)  {
         this.detail = detail;
@@ -50,6 +53,7 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements S
             if(!this.detail.isConnected())
                 return;
 
+            logger.info("getting next message");
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
             collector.emit(new Values(message));

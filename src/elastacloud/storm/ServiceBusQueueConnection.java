@@ -8,6 +8,7 @@ import com.microsoft.windowsazure.services.serviceBus.*;
 import com.microsoft.windowsazure.services.serviceBus.models.*;
 import com.microsoft.windowsazure.services.core.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import javax.xml.datatype.*;
 import java.io.Serializable;
@@ -27,14 +28,14 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serial
     private String connectionString;
     private String queueName;
     private Integer messageCount;
-    private List<String> messages;
     private ServiceBusContract serviceBusContract = null;
     private Boolean isConnected = false;
+
+    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusQueueConnection");
 
     public ServiceBusQueueConnection(String connectionString, String queueName) throws ServiceBusSpoutException {
         this.connectionString = connectionString;
         this.queueName = queueName;
-        messages = new ArrayList<String>();
     }
 
     @Override
@@ -71,10 +72,12 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serial
             CreateQueueResult result = serviceBusContract.createQueue(queueInfo);
             // chances are if this fails we'll be looking at the queue already existing
             isConnected = true;
+            logger.info("connected to service bus queue " + this.getQueueName());
         }
         catch (ServiceException e)
         {
             if(e.getHttpStatusCode() == 409)    {
+                logger.info("connected to service bus queue " + this.getQueueName());
                 isConnected = true;
             }
             else    {
@@ -106,13 +109,14 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serial
                 IOUtils.copy(message.getBody(), writer);
                 String messageBody = writer.toString();
                 // spit this out ...
-                System.out.println("message arrived with value " + messageBody);
+                logger.info("message arrived with value " + messageBody);
                 serviceBusContract.deleteMessage(message);
                 return messageBody;
             }
         }
         catch(Exception se)  {
             try{
+                logger.info("Unlocking message following exception: " + message.toString());
                 serviceBusContract.unlockMessage(message);
             }
             // not sure whether we want to stop if we can't deal with this
