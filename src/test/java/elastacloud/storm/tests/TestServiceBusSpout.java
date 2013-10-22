@@ -21,7 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * To change this template use File | Settings | File Templates.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ServiceBusSpoutTests {
+public class TestServiceBusSpout {
     ServiceBusQueueSpout serviceBusSpout;
     ServiceBusTopicSubscriptionSpout serviceBusTopicSubscriptionSpout;
 
@@ -46,25 +46,25 @@ public class ServiceBusSpoutTests {
 
     /* Tests for service bus queue */
     @Test(expected=ServiceBusSpoutException.class)
-    public void testIncorrectConnectionString() throws ServiceBusSpoutException {
+    public void TestIncorrectConnectionString() throws ServiceBusSpoutException {
         ServiceBusQueueConnection connection = new ServiceBusQueueConnection("test;this", null);
         connection.getConnectionString();
     }
 
     @Test
-    public void testCorrectConnectionString() throws ServiceBusSpoutException {
+    public void TestCorrectConnectionString() throws ServiceBusSpoutException {
         ServiceBusQueueConnection connection = new ServiceBusQueueConnection("test;this;thing", null);
         assertEquals("test;this;thing", connection.getConnectionString());
     }
 
     @Test(expected=ServiceBusSpoutException.class)
-    public void testInvalidQueueName() throws ServiceBusSpoutException  {
+    public void TestInvalidQueueName() throws ServiceBusSpoutException  {
         ServiceBusQueueConnection connection = new ServiceBusQueueConnection("test;this", "sd");
         connection.getQueueName();
     }
 
     @Test
-    public void testConnectSuccess() throws ServiceBusSpoutException    {
+    public void TestConnectSuccess() throws ServiceBusSpoutException    {
         when(serviceBusQueueMock.getQueueName()).thenReturn("thequeue");
         when(serviceBusQueueMock.getConnectionString()).thenReturn("r;r;e");
         when(serviceBusQueueMock.isConnected()).thenReturn(true);
@@ -78,7 +78,7 @@ public class ServiceBusSpoutTests {
     }
 
     @Test
-    public void testConnectFail() throws ServiceBusSpoutException    {
+    public void TestConnectFail() throws ServiceBusSpoutException    {
         when(serviceBusQueueMock.getQueueName()).thenReturn(null);
         when(serviceBusQueueMock.getConnectionString()).thenReturn("r;r");
         when(serviceBusQueueMock.isConnected()).thenReturn(false);
@@ -93,31 +93,31 @@ public class ServiceBusSpoutTests {
 
     /* Tests for subscription-topic */
     @Test(expected=ServiceBusSpoutException.class)
-    public void testIncorrectConnectionStringTopic() throws ServiceBusSpoutException {
+    public void TestIncorrectConnectionStringTopic() throws ServiceBusSpoutException {
         ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", null, null);
         connection.getConnectionString();
     }
 
     @Test
-    public void testCorrectConnectionStringTopic() throws ServiceBusSpoutException {
+    public void TestCorrectConnectionStringTopic() throws ServiceBusSpoutException {
         ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;thing", null, null);
         assertEquals("test;this;thing", connection.getConnectionString());
     }
 
     @Test(expected=ServiceBusSpoutException.class)
-    public void testInvalidTopicName() throws ServiceBusSpoutException  {
+    public void TestInvalidTopicName() throws ServiceBusSpoutException  {
         ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", "sd", null);
         connection.getTopicName();
     }
 
     @Test
-    public void testCorrectSubscription() throws ServiceBusSpoutException  {
+    public void TestCorrectSubscription() throws ServiceBusSpoutException  {
         ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;this", "sd123", null);
         assertEquals("sd123sub", connection.getSubscriptionName());
     }
 
     @Test
-    public void testTopicConnectSuccess() throws ServiceBusSpoutException    {
+    public void TestTopicConnectSuccess() throws ServiceBusSpoutException    {
         when(serviceBusTopicMock.getTopicName()).thenReturn("thetopic");
         when(serviceBusTopicMock.getConnectionString()).thenReturn("r;r;e");
         when(serviceBusTopicMock.isConnected()).thenReturn(true);
@@ -131,7 +131,7 @@ public class ServiceBusSpoutTests {
     }
 
     @Test
-    public void testTopicConnectFail() throws ServiceBusSpoutException    {
+    public void TestTopicConnectFail() throws ServiceBusSpoutException    {
         when(serviceBusTopicMock.getTopicName()).thenReturn(null);
         when(serviceBusTopicMock.getConnectionString()).thenReturn("r;r");
         when(serviceBusTopicMock.isConnected()).thenReturn(true);
