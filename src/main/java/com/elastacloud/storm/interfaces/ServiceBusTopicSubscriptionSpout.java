@@ -1,4 +1,4 @@
-package elastacloud.storm;
+package com.elastacloud.storm.interfaces;
 
 import backtype.storm.spout.*;
 import backtype.storm.task.TopologyContext;
@@ -6,8 +6,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import elastacloud.storm.interfaces.IServiceBusQueueDetail;
-import elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import com.elastacloud.storm.interfaces.IServiceBusTopicDetail;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
@@ -19,7 +18,7 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements S
     private SpoutOutputCollector collector;
     private long processedMessages = 0L;
 
-    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusTopicConnection");
+    static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusTopicConnection");
 
     public ServiceBusTopicSubscriptionSpout(IServiceBusTopicDetail detail)  {
         this.detail = detail;

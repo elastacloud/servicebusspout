@@ -1,7 +1,6 @@
-package elastacloud.storm;
+package com.elastacloud.storm.interfaces;
 
-import elastacloud.storm.interfaces.IServiceBusDetail;
-import elastacloud.storm.interfaces.IServiceBusQueueDetail;
+import com.elastacloud.storm.interfaces.IServiceBusQueueDetail;
 
 // Include the following imports to use service bus APIs
 import com.microsoft.windowsazure.services.serviceBus.*;
@@ -10,19 +9,9 @@ import com.microsoft.windowsazure.services.core.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import javax.xml.datatype.*;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: azurecoder
- * Date: 14/10/2013
- * Time: 09:38
- * To change this template use File | Settings | File Templates.
- */
 public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serializable {
 
     private String connectionString;
@@ -31,7 +20,7 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serial
     private ServiceBusContract serviceBusContract = null;
     private Boolean isConnected = false;
 
-    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusQueueConnection");
+    static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusQueueConnection");
 
     public ServiceBusQueueConnection(String connectionString, String queueName) throws ServiceBusSpoutException {
         this.connectionString = connectionString;

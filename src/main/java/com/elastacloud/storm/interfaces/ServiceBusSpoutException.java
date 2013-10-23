@@ -1,4 +1,4 @@
-package elastacloud.storm;
+package com.elastacloud.storm.interfaces;
 
 import org.apache.log4j.Logger;
 
@@ -12,7 +12,7 @@ import java.io.Serializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ServiceBusSpoutException extends Exception implements Serializable {
-    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusSpoutException");
+    static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusSpoutException");
     public ServiceBusSpoutException(String message) {
         super(message);
         logger.error(message);

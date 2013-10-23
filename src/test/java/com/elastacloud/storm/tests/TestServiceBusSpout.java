@@ -1,11 +1,12 @@
-package elastacloud.storm.tests;
+package com.elastacloud.storm.tests;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import elastacloud.storm.*;
-import elastacloud.storm.interfaces.IServiceBusQueueDetail;
-import elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import com.elastacloud.storm.*;
+import com.elastacloud.storm.interfaces.IServiceBusQueueDetail;
+import com.elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import com.elastacloud.storm.ServiceBusTopicSubscriptionSpout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,13 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Created with IntelliJ IDEA.
- * User: azurecoder
- * Date: 12/10/2013
- * Time: 21:33
- * To change this template use File | Settings | File Templates.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class TestServiceBusSpout {
     ServiceBusQueueSpout serviceBusSpout;

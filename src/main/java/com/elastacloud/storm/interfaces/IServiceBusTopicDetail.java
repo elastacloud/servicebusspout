@@ -1,6 +1,6 @@
-package elastacloud.storm.interfaces;
+package com.elastacloud.storm.interfaces;
 
-import elastacloud.storm.ServiceBusSpoutException;
+import com.elastacloud.storm.ServiceBusSpoutException;
 
 /** Interface used to return the details of a service bus topic  */
 public interface IServiceBusTopicDetail extends IServiceBusDetail {

@@ -1,29 +1,17 @@
-package elastacloud.storm;
-
-import elastacloud.storm.interfaces.IServiceBusDetail;
-import elastacloud.storm.interfaces.IServiceBusQueueDetail;
+package com.elastacloud.storm;
 
 // Include the following imports to use service bus APIs
 import com.microsoft.windowsazure.services.serviceBus.*;
 import com.microsoft.windowsazure.services.serviceBus.models.*;
 import com.microsoft.windowsazure.services.core.*;
-import elastacloud.storm.interfaces.IServiceBusTopicDetail;
+import com.elastacloud.storm.interfaces.IServiceBusTopicDetail;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import javax.xml.datatype.*;
-import java.io.Serializable;
+        import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: azurecoder
- * Date: 14/10/2013
- * Time: 09:38
- * To change this template use File | Settings | File Templates.
- */
+
 public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serializable {
 
     private String connectionString;
@@ -33,7 +21,7 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
     private Boolean isConnected = false;
     private String filter;
 
-    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusTopicConnection");
+    static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusTopicConnection");
 
     public ServiceBusTopicConnection(String connectionString, String topicName, String filter) throws ServiceBusSpoutException {
         this.connectionString = connectionString;

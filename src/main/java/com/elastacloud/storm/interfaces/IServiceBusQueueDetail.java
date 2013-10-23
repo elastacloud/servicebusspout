@@ -1,6 +1,6 @@
-package elastacloud.storm.interfaces;
+package com.elastacloud.storm.interfaces;
 
-import elastacloud.storm.ServiceBusSpoutException;
+import com.elastacloud.storm.ServiceBusSpoutException;
 
 /** returns details of the service bus queue */
 public interface IServiceBusQueueDetail extends IServiceBusDetail {

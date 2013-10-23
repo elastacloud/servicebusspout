@@ -1,4 +1,4 @@
-package elastacloud.storm;
+package com.elastacloud.storm;
 
 import backtype.storm.spout.*;
 import backtype.storm.task.TopologyContext;
@@ -6,32 +6,32 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import elastacloud.storm.interfaces.IServiceBusQueueDetail;
+import com.elastacloud.storm.interfaces.IServiceBusTopicDetail;
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class ServiceBusQueueSpout extends BaseRichSpout {
-    private IServiceBusQueueDetail detail;
+public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements Serializable {
+
+    private IServiceBusTopicDetail detail;
     private SpoutOutputCollector collector;
     private long processedMessages = 0L;
 
-    static final Logger logger = Logger.getLogger("elastacloud.storm.ServiceBusQueueSpout");
+    static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusTopicConnection");
 
-    public ServiceBusQueueSpout(IServiceBusQueueDetail detail)  {
-         this.detail = detail;
+    public ServiceBusTopicSubscriptionSpout(IServiceBusTopicDetail detail)  {
+        this.detail = detail;
     }
 
-    public ServiceBusQueueSpout(String connectionString, String queueName) throws ServiceBusSpoutException  {
-        this.detail = new ServiceBusQueueConnection(connectionString, queueName);
+    public ServiceBusTopicSubscriptionSpout(String connectionString, String topicName) throws ServiceBusSpoutException  {
+        this.detail = new ServiceBusTopicConnection(connectionString, topicName, null);
     }
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
         this.collector = spoutOutputCollector;
-
         try {
-            logger.info("connecting to service bus queue " + this.detail.getQueueName());
             this.detail.connect();
             this.collector = spoutOutputCollector;
         }
@@ -41,7 +41,7 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
 
     @Override
     public void close() {
-        logger.info("closing service bus contract ");
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -49,20 +49,17 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
         // we'll try this on the main thread - if there is a problem then we'll implement runnable
         // check performance against this approach but we can let the spout scale rather than scale ourselves
         try{
-            logger.info("attempting to get next message from queue " + this.detail.getQueueName());
             if(!this.detail.isConnected())
                 return;
 
+            logger.info("getting next message");
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
-            logger.info("Received message is null: " + (message == null));
             collector.emit(new Values(message));
             processedMessages++;
         }
-        catch(ServiceBusSpoutException sbse)    {
-            // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
+        catch(ServiceBusSpoutException sbse)    {                  // if this occurs we probably want to passthru - maybe a short sleep to unlock the thread
             // TODO: look at adding a retry-fail strategy if this continually dies then it maybe that we're connected but something
-            logger.error(sbse.getMessage());
             // has happened to the SB namespace
             try{Thread.sleep(500);} catch(InterruptedException ie) {};
         }

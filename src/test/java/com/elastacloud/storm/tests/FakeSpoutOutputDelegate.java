@@ -1,16 +1,11 @@
-package elastacloud.storm.tests;
+package com.elastacloud.storm.tests;
 
 import backtype.storm.spout.ISpoutOutputCollector;
-import backtype.storm.spout.SpoutOutputCollector;
 
 import java.util.List;
 
-public class FakeSpoutOutputCollector extends SpoutOutputCollector
+public class FakeSpoutOutputDelegate implements ISpoutOutputCollector
 {
-    public FakeSpoutOutputCollector(ISpoutOutputCollector delegate) {
-        super(delegate);
-    }
-
     @Override
     public List<Integer> emit(String s, List<Object> objects, Object o) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
@@ -26,4 +21,3 @@ public class FakeSpoutOutputCollector extends SpoutOutputCollector
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }
-
