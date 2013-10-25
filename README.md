@@ -12,7 +12,7 @@ TopologyBuilder builder = new TopologyBuilder();
 
 builder.setSpout("sb-queue-reader",new ServiceBusQueueSpout(connection));
 builder.setBolt("bolt-reader", new AnyBolt())
-    .shuffleGrouping("any-bolt");
+    .shuffleGrouping("sb-queue-reader");
 
 Configuration configuration = new Configuration();
 LocalCluster cluster = new LocalCluster();
