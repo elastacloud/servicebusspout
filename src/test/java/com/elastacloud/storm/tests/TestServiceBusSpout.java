@@ -62,13 +62,14 @@ public class TestServiceBusSpout {
         when(serviceBusQueueMock.getQueueName()).thenReturn("thequeue");
         when(serviceBusQueueMock.getConnectionString()).thenReturn("r;r;e");
         when(serviceBusQueueMock.isConnected()).thenReturn(true);
+        when(serviceBusQueueMock.getNextMessageForSpout()).thenReturn(null);
         serviceBusSpout.open(null, null, new FakeSpoutOutputCollector(new FakeSpoutOutputDelegate()));
         serviceBusSpout.nextTuple();
 
         verify(serviceBusQueueMock, times(1)).connect();
         verify(serviceBusQueueMock, times(1)).isConnected();
         assertTrue(serviceBusSpout.isConnected());
-        assertEquals(1, serviceBusSpout.getProcessedMessageCount());
+        assertEquals(0, serviceBusSpout.getProcessedMessageCount());
     }
 
     @Test
@@ -88,40 +89,43 @@ public class TestServiceBusSpout {
     /* Tests for subscription-topic */
     @Test(expected=ServiceBusSpoutException.class)
     public void TestIncorrectConnectionStringTopic() throws ServiceBusSpoutException {
-        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", null, null);
+        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", null, null, null);
         connection.getConnectionString();
     }
 
     @Test
     public void TestCorrectConnectionStringTopic() throws ServiceBusSpoutException {
-        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;thing", null, null);
+        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;thing", null, null, null);
         assertEquals("test;this;thing", connection.getConnectionString());
     }
 
     @Test(expected=ServiceBusSpoutException.class)
     public void TestInvalidTopicName() throws ServiceBusSpoutException  {
-        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", "sd", null);
+        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this", "sd", null, null);
         connection.getTopicName();
     }
 
     @Test
     public void TestCorrectSubscription() throws ServiceBusSpoutException  {
-        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;this", "sd123", null);
+        ServiceBusTopicConnection connection = new ServiceBusTopicConnection("test;this;this", "sd123", null, null);
         assertEquals("sd123sub", connection.getSubscriptionName());
     }
 
     @Test
+
     public void TestTopicConnectSuccess() throws ServiceBusSpoutException    {
         when(serviceBusTopicMock.getTopicName()).thenReturn("thetopic");
-        when(serviceBusTopicMock.getConnectionString()).thenReturn("r;r;e");
+        when(serviceBusTopicMock.getConnectionString()).thenReturn("rsdf;rsdf;esdf");
         when(serviceBusTopicMock.isConnected()).thenReturn(true);
+        when(serviceBusTopicMock.getNextMessageForSpout()).thenReturn(null);
         serviceBusTopicSubscriptionSpout.open(null, null, new FakeSpoutOutputCollector(new FakeSpoutOutputDelegate()));
         serviceBusTopicSubscriptionSpout.nextTuple();
 
         verify(serviceBusTopicMock, times(1)).connect();
         verify(serviceBusTopicMock, times(1)).isConnected();
+
         assertTrue(serviceBusTopicSubscriptionSpout.isConnected());
-        assertEquals(1, serviceBusTopicSubscriptionSpout.getProcessedMessageCount());
+        assertEquals(0, serviceBusTopicSubscriptionSpout.getProcessedMessageCount());
     }
 
     @Test

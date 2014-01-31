@@ -20,12 +20,14 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
     private ServiceBusContract serviceBusContract = null;
     private Boolean isConnected = false;
     private String filter;
+    private String subscriptionName;
 
     static final Logger logger = Logger.getLogger("elastacloud.storm.com.elastacloud.storm.interfaces.ServiceBusTopicConnection");
 
-    public ServiceBusTopicConnection(String connectionString, String topicName, String filter) throws ServiceBusSpoutException {
+    public ServiceBusTopicConnection(String connectionString, String topicName, String subscriptionName, String filter) throws ServiceBusSpoutException {
         this.connectionString = connectionString;
         this.topicName = topicName;
+        this.subscriptionName = subscriptionName != null ? subscriptionName : topicName + "sub";
         this.filter = filter;
     }
 
@@ -53,7 +55,7 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
 
     @Override
     public String getSubscriptionName() throws ServiceBusSpoutException{
-        return getTopicName() + "sub";
+        return subscriptionName;
     }
 
     @Override
@@ -75,14 +77,23 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
                 CreateTopicResult ctResult = serviceBusContract.createTopic(topicInfo);
             }
             catch(ServiceException se)  {
-                if(se.getHttpStatusCode() != 409)
-                    throw se;
+                //if(se.getHttpStatusCode() != 409)
+                    //throw se;
             }
 
-            String subscriptionName = getTopicName() + "sub";
+            String subscriptionName = getSubscriptionName();
             // create a subscription for the topic
             SubscriptionInfo subInfo = new SubscriptionInfo(subscriptionName);
-            CreateSubscriptionResult result = serviceBusContract.createSubscription(getTopicName(), subInfo);
+
+
+            try {
+                CreateSubscriptionResult result = serviceBusContract.createSubscription(getTopicName(), subInfo);
+            }
+            catch(ServiceException se)  {
+                //if(se.getHttpStatusCode() != 409)
+                    //throw se;
+            }
+
             if(this.filter != null && !this.filter.isEmpty())  {
                 RuleInfo ruleInfo = new RuleInfo();
                 ruleInfo = ruleInfo.withSqlExpressionFilter(filter);
@@ -114,7 +125,7 @@ public class ServiceBusTopicConnection implements IServiceBusTopicDetail, Serial
         BrokeredMessage message = null;
         try {
 
-            ReceiveSubscriptionMessageResult receive = serviceBusContract.receiveSubscriptionMessage(getTopicName(), getTopicName() + "sub", receiveOptions);
+            ReceiveSubscriptionMessageResult receive = serviceBusContract.receiveSubscriptionMessage(getTopicName(), getSubscriptionName(), receiveOptions);
             message = receive.getValue();
 
             if (message != null && message.getMessageId() != null)

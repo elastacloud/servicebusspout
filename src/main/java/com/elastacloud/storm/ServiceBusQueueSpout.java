@@ -56,6 +56,11 @@ public class ServiceBusQueueSpout extends BaseRichSpout {
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
             logger.info("Received message is null: " + (message == null));
+
+            //pointless emitting a null message
+            if(message == null)
+                return;
+
             collector.emit(new Values(message));
             processedMessages++;
         }

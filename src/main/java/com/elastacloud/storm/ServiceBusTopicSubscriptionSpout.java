@@ -24,8 +24,8 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements S
         this.detail = detail;
     }
 
-    public ServiceBusTopicSubscriptionSpout(String connectionString, String topicName) throws ServiceBusSpoutException  {
-        this.detail = new ServiceBusTopicConnection(connectionString, topicName, null);
+    public ServiceBusTopicSubscriptionSpout(String connectionString, String topicName, String subscriptionName) throws ServiceBusSpoutException  {
+        this.detail = new ServiceBusTopicConnection(connectionString, topicName, subscriptionName, null);
     }
 
     @Override
@@ -55,6 +55,11 @@ public class ServiceBusTopicSubscriptionSpout extends BaseRichSpout implements S
             logger.info("getting next message");
             // this message can be anything - most likely JSON but we don't impose a structure in the spout
             String message = this.detail.getNextMessageForSpout();
+
+            //pointless emitting if there is no message
+            if(message == null)
+                return;
+
             collector.emit(new Values(message));
             processedMessages++;
         }
