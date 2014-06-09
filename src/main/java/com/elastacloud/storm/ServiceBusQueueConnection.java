@@ -90,9 +90,9 @@ public class ServiceBusQueueConnection implements IServiceBusQueueDetail, Serial
             System.out.println("waiting on queue for messages ... ");
             ReceiveQueueMessageResult receive = serviceBusContract.receiveQueueMessage(this.queueName, receiveOptions);
 
+            message = receive.getValue();
             if (message != null && message.getMessageId() != null)
             {
-                message = receive.getValue();
                 // get the string value from the body
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(message.getBody(), writer);
